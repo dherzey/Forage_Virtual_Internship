@@ -4,7 +4,7 @@
 
 ## Task 2: Experimentation and uplift testing
 
-From the merged data we had cleaned in the previous task, we are now asked to analyze the performance of each trial store (`STORE_NBR=77,86,88`) as compared to the control stores. We don't have any pre-defined control stores, so from the data we would need to select control stores with similar enough measurements to our trial stores before the trial period which started on February 2019. To determine what stores can be in the control group, we first defined the following measurements for each store per month:
+From the merged data we had cleaned in the previous task, we are now asked to analyze the performance of each trial store (`STORE_NBR=77,86,88`) as compared to the control stores. We don't have any pre-defined control stores, so from the data we would need to select control stores with similar enough measurements to our trial stores before the trial period which began on February 2019 until April 2019. To determine what stores can be in the control group, we first defined the following measurements for each store per month:
 
 - total sales of chips
 - number of customers
@@ -36,7 +36,7 @@ def calculate_measures(data) -> pd.DataFrame:
     
     return measures
 ```
-
+With our measurements, we can further compare each store to our trial stores by calculating their correlation and the difference between their measurements. The following `correlation()` and `magnitude_distance()` functions will calculate for these measurement, respectively.
 ```python
 def correlation(t_store_nbr, c_store_nbr, columns, measures) -> pd.DataFrame:
     """
@@ -90,8 +90,13 @@ def magnitude_distance(t_store_nbr, c_store_nbr, columns, measures) -> pd.DataFr
 
     for col in columns:
         final[col] = 1 - ((final[col]-final[col].min())/(final[col].max()-final[col].min()))
+    
+    #we average the magnitude distance for each store and month
+    final['MAG_SCORE'] = final[columns].mean(axis=1)
 
-    return final
+    return final[['YEARMONTH','TRIAL_STORE_NBR','CONTROL_STORE_NBR','MAG_SCORE']]
 ```
+
+### Analyzing data for the pre-trial period:
 
 ## Task 3: Analytics and commercial application

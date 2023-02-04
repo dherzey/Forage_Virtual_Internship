@@ -36,7 +36,7 @@ def calculate_measures(data) -> pd.DataFrame:
     
     return measures
 ```
-With our measurements, we can further compare each store to our trial stores by calculating their correlation and the difference between their measurements. The following `correlation()` and `magnitude_distance()` functions will calculate for these measurement, respectively.
+With our measurements, we can further compare each store to our trial stores by calculating their correlation and the difference between their measurements. The following `correlation()` and `magnitude_distance()` functions will calculate for these measurements, respectively.
 ```python
 def correlation(t_store_nbr, c_store_nbr, columns, measures) -> pd.DataFrame:
     """
@@ -96,7 +96,26 @@ def magnitude_distance(t_store_nbr, c_store_nbr, columns, measures) -> pd.DataFr
 
     return final[['YEARMONTH','TRIAL_STORE_NBR','CONTROL_STORE_NBR','MAG_SCORE']]
 ```
-
+In order to rank our control stores, we average our correlation and distance measurements for each store and month.
+```python
+def combined_measures(t_store_nbr, c_store_nbr, columns, measures):
+    """
+    This function will call both correlation() and magnitude_distance()
+    to average their measures for a final control score
+    """
+    
+    indices = ['YEARMONTH','TRIAL_STORE_NBR','CONTROL_STORE_NBR']
+    
+    corr_measure = correlation(t_store_nbr, c_store_nbr, columns, measures)
+    mag_measure = magnitude_distance(t_store_nbr, c_store_nbr, columns, measures)
+    
+    combined = corr_measure.merge(mag_measure, on=indices)
+    combined['CONTROL_SCORE'] = sum([abs(combined.CORR_SCORE),combined.MAG_SCORE])*0.5
+    
+    return combined
+```
 ### Analyzing data for the pre-trial period:
+
+
 
 ## Task 3: Analytics and commercial application

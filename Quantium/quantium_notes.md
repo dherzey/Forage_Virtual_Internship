@@ -38,12 +38,11 @@ def calculate_measures(data) -> pd.DataFrame:
 ```
 
 ```python
-def correlation(t_store_nbr, c_store_nbr, measures=measures):
+def correlation(t_store_nbr, c_store_nbr, columns, measures) -> pd.DataFrame:
     """
     Function to calculate for the correlation of each control store
     to the given trial store.
     """
-    columns = ['TOT_SALES', 'CUST_COUNT', 'TXN_PER_CUST', 'CHPS_PER_CUST', 'PRICE_PER_UNIT']
 
     corr_dict = {"YEARMONTH": [],
                  "TRIAL_STORE_NBR": [],
@@ -66,27 +65,33 @@ def correlation(t_store_nbr, c_store_nbr, measures=measures):
 ```
 
 ```python
-def magnitude_distance(t_store_nbr, c_store_nbr, measures=measures):
+def magnitude_distance(t_store_nbr, c_store_nbr, columns, measures) -> pd.DataFrame:
     """
     Function to calculate for the magnitude distance. This
     will return standardized distances for each column.
-    """
-    
-    columns = ['TOT_SALES', 'CUST_COUNT', 'TXN_PER_CUST', 
-               'CHPS_PER_CUST', 'PRICE_PER_UNIT']
+    """    
     
     df1 = measures[measures.STORE_NBR==t_store_nbr][columns].reset_index(drop=True)
-    df2 = measures[measures.STORE_NBR==c_store_nbr[0]][columns].reset_index(drop=True)
-    diff = abs(df1.subtract(df2))
     
-    for i in c_store_nbr[1:]:
-        df2 = measures[measures.STORE_NBR==i][columns].reset_index(drop=True)
-        diff = pd.concat([diff, abs(df1.subtract(df2))], ignore_index=True)
+    distance = []
+    for i in c_store_nbr:
         
+        control = measures[measures.STORE_NBR==i]
+        df2 = control[columns].reset_index(drop=True)
+        diff = abs(df1.subtract(df2))
+
+        diff['CONTROL_STORE_NBR'] = i
+        diff['YEARMONTH'] = control['YEARMONTH'].to_list()
+
+        distance.append(diff)
+        
+    final = pd.concat(distance)
+    final['TRIAL_STORE_NBR'] = t_store_nbr
+
     for col in columns:
-        diff[col] = 1 - ((diff[col]-diff[col].min())/(diff[col].max()-diff[col].min()))
-        
-    return diff
+        final[col] = 1 - ((final[col]-final[col].min())/(final[col].max()-final[col].min()))
+
+    return final
 ```
 
 ## Task 3: Analytics and commercial application

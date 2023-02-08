@@ -110,12 +110,11 @@ def combined_measures(t_store_nbr, c_store_nbr, columns, measures):
     mag_measure = magnitude_distance(t_store_nbr, c_store_nbr, columns, measures)
     
     combined = corr_measure.merge(mag_measure, on=indices)
-    combined['CONTROL_SCORE'] = sum([abs(combined.CORR_SCORE),combined.MAG_SCORE])*0.5
+    combined['CONTROL_SCORE'] = (combined.CORR_SCORE*0.5) + (combined.MAG_SCORE*0.5)
     
-    return combined
+    return combined.groupby(['TRIAL_STORE_NBR','CONTROL_STORE_NBR']).mean().reset_index()
 ```
 ### Analyzing data for the pre-trial period:
-
 
 
 ## Task 3: Analytics and commercial application
